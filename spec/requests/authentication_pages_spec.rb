@@ -15,7 +15,7 @@ describe "Authentication" do
     
     describe "with valid information" do
       let(:user) { FactoryGirl.create(:user) }
-      before { valid_signin user }
+      before { sign_in user }
       
       it { should have_selector('title', text: user.name) }
       it { should have_link('Profile', href: user_path(user)) }
@@ -46,6 +46,25 @@ describe "Authentication" do
   
   describe "authentication" do
     
+    describe "for sign-in users" do
+      let(:user) { FactoryGirl.create(:user) }
+      before { sign_in user }
+      
+      describe "in Users controller" do
+        describe "try to access to create new user page" do
+          before { get new_user_path }
+          
+          specify { response.should redirect_to(user_path(user)) }
+        end
+        
+        describe "creating a new user" do
+          before { post users_path }
+          
+          specify { response.should redirect_to(user_path(user)) }
+        end
+      end
+    end
+    
     describe "for none-sign-in users" do
       let(:user) { FactoryGirl.create(:user) }
       
@@ -54,7 +73,12 @@ describe "Authentication" do
           before { visit edit_user_path(user) }
           
           it { should have_selector('title', text: 'Sign in') }
+          it { should_not have_link('Profile', href: user_path(user)) }
+          it { should_not have_link('Users', href: users_path) }
+          it { should_not have_link('Sign out', href: signout_path) }
+          it { should_not have_link('Settings', href: edit_user_path(user)) }
         end
+        
         describe "submitting to the update action" do
           before { put user_path(user) }
           
@@ -79,6 +103,19 @@ describe "Authentication" do
         describe "After sign in" do
           
           it { should have_selector('title', text:"Edit User") }
+          
+          describe "when signing in again" do
+            before do
+              visit signin_path
+              fill_in "Email",    with: user.email
+              fill_in "Password", with: user.password
+              click_button "Sign in"
+            end
+
+            it "should render the default (profile) page" do
+              page.should have_selector('title', text: user.name) 
+            end
+          end
         end
       end
     end
