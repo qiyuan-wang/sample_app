@@ -24,9 +24,22 @@ describe "Static Pages" do
         visit root_path
       end
       
+      it { should have_content("#{user.microposts.count} microposts") }
+      
       it "should render user's feed" do
         user.feed.each do |item|
           page.should have_selector("li##{item.id}", text: item.content)
+        end
+      end
+      
+      describe "pagination" do
+        
+        it { should_not have_selector('div.pagination') }
+        
+        it "should list each micropost" do
+          user.microposts.paginate(page: 1).each do |item|
+            page.should have_selector('li', text: item.content)
+          end
         end
       end
     end

@@ -11,7 +11,7 @@ FactoryGirl.define do
   end
   
   factory :micropost do
-    content "Lorie ipsum"
+    sequence(:content) {|n| "Lorie ipsum #{n}"}
     user
   end
 end
