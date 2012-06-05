@@ -7,6 +7,10 @@
 			<%= @user.name %>
 		</h1>	
 		</section>
+		<section>
+			<%= render 'shared/stats' %>
+		</section>
+		<%= render 'follow_form' if signed_in? %>
 	</aside>
 	<div class="span8">
 		<% if @user.microposts.any? %>
